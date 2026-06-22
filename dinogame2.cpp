@@ -36,31 +36,31 @@ string playerName = "Player";
 
 // ==================== QUEUE (Pertemuan 5) - Untuk Rintangan ====================
 struct Hurdle {
-    int x;
-    int y;
-    bool passed;
+    int x; //koordinate horixontal (posisi kiri-kanan)
+    int y; //koordinate vertikal (posisi atas- bawah)
+    bool passed; //flag : apakah rintangan sudah dilewati pemain
 };
 
 class QueueHurdle {
 private:
-    vector<Hurdle> arr;
-    int front;
+    vector<Hurdle> arr; // storage menggunakan vector dinamis
+    int front;          // indeks elemen depan (head) dari antrean
     
 public:
     QueueHurdle() {
-        front = 0;
+        front = 0;         //inisialisasi indeks depan
     }
     
     void enqueue(Hurdle h) {
-        arr.push_back(h);
+        arr.push_back(h);   //menambahkan elemen baru ke belakang antrean
     }
     
     Hurdle dequeue() {
         if (isEmpty()) {
-            return Hurdle();
+            return Hurdle(); //return Hurdle kosong jika antrean kosong
         }
-        Hurdle h = arr[front];
-        front++;
+        Hurdle h = arr[front]; //ambil elemen di indeks front
+        front++;//geser front ke elemen berikutnya
         return h;
     }
     
@@ -69,8 +69,8 @@ public:
     }
     
     Hurdle getFront() {
-        if (isEmpty()) return Hurdle();
-        return arr[front];
+        if (isEmpty()) return Hurdle(); //return kosong jika antrean kosong
+        return arr[front];  //return elemen di posisi front
     }
     
     int size() {
@@ -83,35 +83,35 @@ QueueHurdle hurdleQueue;
 // ==================== STACK (Pertemuan 4) - Untuk Riwayat Skor ====================
 class StackScore {
 private:
-    int arr[MAX_SCORE_HISTORY];
-    int top;
+    int arr[MAX_SCORE_HISTORY];     //array fixt size (100 elemen)
+    int top;                        //indekks elemen paling atas
     
 public:
     StackScore() {
-        top = -1;
+        top = -1;               //insialisasi stack kosong (top = -1)
     }
     
     void push(int score) {
-        if (top < MAX_SCORE_HISTORY - 1) {
-            top++;
-            arr[top] = score;
+        if (top < MAX_SCORE_HISTORY - 1) { // cek apakah masih ada ruang 
+            top++;                          //incerement top
+            arr[top] = score;           //simpan skor baru di posisi top baru
         }
     }
     
     int pop() {
-        if (top == -1) return -1;
-        int score = arr[top];
-        top--;
+        if (top == -1) return -1;       //stack kosong , return -1
+        int score = arr[top];            //ambil elemen di atas
+        top--;                           //decrement top
         return score;
     }
     
     bool isEmpty() {
         return top == -1;
     }
-    
+     
     int getTop() {
-        if (top == -1) return -1;
-        return arr[top];
+        if (top == -1) return -1;       //Stack kosong , return -1
+        return arr[top];                //return elemen paling atas
     }
 };
 
@@ -119,10 +119,10 @@ StackScore scoreHistory;
 
 // ==================== BST (Pertemuan 9) - Untuk Leaderboard ====================
 struct PlayerNode {
-    string name;
-    int score;
-    PlayerNode* left;
-    PlayerNode* right;
+    string name;            //nama pemain
+    int score;              //skor pemina
+    PlayerNode* left;       //pointer ke anak kiri
+    PlayerNode* right;      // pointer ke anak kanan
 };
 
 class BSTLeaderboard {
@@ -131,14 +131,17 @@ private:
     
     PlayerNode* insertNode(PlayerNode* node, string name, int score) {
         if (node == nullptr) {
+            //1. Node belum ada , buat node baru
             node = new PlayerNode;
             node->name = name;
             node->score = score;
             node->left = nullptr;
             node->right = nullptr;
         } else if (score <= node->score) {
+            //2. Score <= node score , masuk ke anak kiri (rekursif)
             node->left = insertNode(node->left, name, score);
         } else {
+            //3. score > node.parent , masuk anak kanan (rekursif)
             node->right = insertNode(node->right, name, score);
         }
         return node;
@@ -146,8 +149,13 @@ private:
     
     void inorderTraversal(PlayerNode* node, vector<pair<string,int>>& result) {
         if (node != nullptr) {
+            //1. Traversal kiri
             inorderTraversal(node->left, result);
+
+            //2. ambil node saat ini
             result.push_back({node->name, node->score});
+
+            //3.traversal kanan
             inorderTraversal(node->right, result);
         }
     }
@@ -163,9 +171,11 @@ public:
     
     vector<pair<string,int>> getLeaderboardSorted() {
         vector<pair<string,int>> result;
-        inorderTraversal(root, result);
+        inorderTraversal(root, result); // get sorted ascending
+
+        //sort lagi jadi ascending (score tertinggi di atas)
         sort(result.begin(), result.end(), [](pair<string,int> a, pair<string,int> b) {
-            return a.second > b.second;
+            return a.second > b.second;//descending berdasarkan score
         });
         return result;
     }
@@ -176,18 +186,18 @@ BSTLeaderboard leaderboard;
 // ==================== HASHING (Pertemuan 13) - Untuk Pencarian Pemain ====================
 class HashTablePlayer {
 private:
-    map<string, int> hashTable;
+    map<string, int> hashTable;     //key = nama , value = score
     
 public:
     void insertPlayer(string name, int score) {
-        hashTable[name] = score;
+        hashTable[name] = score; //Update key
     }
     
     int searchPlayer(string name) {
         if (hashTable.find(name) != hashTable.end()) {
-            return hashTable[name];
+            return hashTable[name]; // return score jika di temukan
         }
-        return -1;
+        return -1;  //return -1 jika not found
     }
     
     bool hasPlayer(string name) {
@@ -206,8 +216,8 @@ HashTablePlayer playerHash;
 // ==================== GRAPH + BFS/DFS (Pertemuan 11 & 12) - Untuk Jalur ====================
 class Graph {
 private:
-    int V;
-    map<int, vector<int>> adj;
+    int V;                  //jumlah vertex(vertices)
+    map<int, vector<int>> adj; //adjacency list : vertex , list tetangga
     
 public:
     Graph(int vertices) {
@@ -220,26 +230,27 @@ public:
     }
     
     vector<int> BFS(int start, int end) {
-        vector<int> path;
-        map<int, bool> visited;
-        map<int, int> parent;
+        vector<int> path;           //hasil : jalur dari start ke end
+        map<int, bool> visited;     //track vertex yang sudah dikunjungi
+        map<int, int> parent;       //track parent untuk rekonstruksi jalur
         
-        queue<int> q;
-        q.push(start);
-        visited[start] = true;
-        parent[start] = -1;
+        queue<int> q;               //queue untuk BFS
+        q.push(start);              //mulai dari vertex start
+        visited[start] = true;      //mark start sebagai visited
+        parent[start] = -1;         //start punya parent -1 (tidak ada)
         
-        while (!q.empty()) {
-            int u = q.front();
-            q.pop();
+        while (!q.empty()) {        //ambil vertex di depan queue
+            int u = q.front();         //remove dari queue
+            q.pop();    
             
-            if (u == end) break;
-            
+            if (u == end) break;        //jika sudah end ,stop
+
+            //Kunjungin semua tetangga u
             for (int v : adj[u]) {
                 if (!visited[v]) {
-                    visited[v] = true;
-                    parent[v] = u;
-                    q.push(v);
+                    visited[v] = true;  //mark visited
+                    parent[v] = u;      //set parent v = u
+                    q.push(v);          //push v ke queue
                 }
             }
         }
@@ -247,10 +258,10 @@ public:
         if (visited[end]) {
             int curr = end;
             while (curr != -1) {
-                path.push_back(curr);
-                curr = parent[curr];
+                path.push_back(curr);       //tambah curr ke path
+                curr = parent[curr];        //go ke parent
             }
-            reverse(path.begin(), path.end());
+            reverse(path.begin(), path.end());      //balik path (start ,end)
         }
         
         return path;
@@ -293,10 +304,10 @@ void init() {
     
     for (int i = 0; i < 1; i++) {
         Hurdle h;
-        h.x = HURDLE_START_X - (i * 40);
+        h.x = HURDLE_START_X - (i * 40);//posisi awal rintangan
         h.y = 20;
         h.passed = false;
-        hurdleQueue.enqueue(h);
+        hurdleQueue.enqueue(h); //rintangan baru masuk ke antrean
     }
 }
 
@@ -348,6 +359,7 @@ void moveDino(int jump = 0) {
 
 // ==================== DRAW HURDLE (INTEGRASI QUEUE) ====================
 void drawHurdle() {
+    //1.Jika antrean kosong maka buat rintangan baru
     if (hurdleQueue.isEmpty()) {
         Hurdle h;
         h.x = HURDLE_START_X;
@@ -355,17 +367,20 @@ void drawHurdle() {
         h.passed = false;
         hurdleQueue.enqueue(h);
     }
-    
-    Hurdle current = hurdleQueue.getFront();
-    
+    //2. Ambil rintangan terdepan
+    Hurdle current = hurdleQueue.getFront();//Ambil rintangan terdepan
+
+    //3. Gambar rintangan di konsol
     gotoxy(current.x, 20); cout << "| | ";
     gotoxy(current.x, 21); cout << "| | ";
     gotoxy(current.x, 22); cout << "|_| ";
     gotoxy(current.x, 23); cout << " |  ";
     gotoxy(current.x, 24); cout << " |  ";
     
+    // 4. Geser rintangan ke kiri
     current.x--;
     
+    // 5. Deteksi tabrakan (Game over)
     if (current.x == DINO_POS_X + 5 && dinoY < 4) {
     gotoxy(36, 8); cout << "Game Over";
     gotoxy(36, 10); cout << "Final Score: " << currentScore;
@@ -375,6 +390,7 @@ void drawHurdle() {
     return;
 	}
     
+    // 6.Jika rintangan sudah lewat , tambah skor
     if (current.x < DINO_POS_X - 5 && !current.passed) {
         current.passed = true;
         currentScore++;
@@ -387,10 +403,10 @@ void drawHurdle() {
         
         if (speed > 20) speed--;
     }
-    
+    //7. Jika masih ada rintangan yang lain , tambah rintangan baru
     if (!hurdleQueue.isEmpty()) {
-        hurdleQueue.enqueue(current);
-        hurdleQueue.dequeue();
+        hurdleQueue.enqueue(current);   //tambah versi yang sudah digeser ke antrean
+        hurdleQueue.dequeue();          //hapus versi lama dari antrean
     }
 }
 // ==================== PLAY GAME ====================
@@ -432,7 +448,7 @@ void play() {
             break;
         } else if (ch == 'r' || ch == 'R') {
             if (!scoreHistory.isEmpty()) {
-                currentScore = scoreHistory.pop();
+                currentScore = scoreHistory.pop(); //restore skor sebelumnya
                 gotoxy(11, 2); cout << "     ";
                 gotoxy(11, 2); cout << currentScore;
             }
