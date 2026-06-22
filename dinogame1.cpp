@@ -7,7 +7,9 @@
 #include <map>
 #include <queue>
 #include <vector>
+#include <fstream>
 
+#define SCORE_FILE "scores_dino.txt"
 #define DINO_POS_X 2
 #define HURDLE_START_X 74
 #define MAX_SCORE_HISTORY 100
@@ -22,6 +24,8 @@ void searchPlayer();
 void showJalur();
 void play();
 void instructions();
+void saveScoreToFile(string name,int score);
+void loadScoresFromFile();
 
 // ==================== GAME STATE ====================
 int dinoY = 0;
@@ -363,13 +367,13 @@ void drawHurdle() {
     current.x--;
     
     if (current.x == DINO_POS_X + 5 && dinoY < 4) {
-        scoreHistory.push(currentScore);
-        
-        gotoxy(36, 8); cout << "Game Over";
-        gotoxy(36, 10); cout << "Final Score: " << currentScore;
-        getch();
-        gameover = 1;
-    }
+    gotoxy(36, 8); cout << "Game Over";
+    gotoxy(36, 10); cout << "Final Score: " << currentScore;
+    saveScoreToFile(playerName, currentScore);
+    getch();
+    gameover = 1;
+    return;
+	}
     
     if (current.x < DINO_POS_X - 5 && !current.passed) {
         current.passed = true;
@@ -389,7 +393,6 @@ void drawHurdle() {
         hurdleQueue.dequeue();
     }
 }
-
 // ==================== PLAY GAME ====================
 void play() {
     system("cls");
@@ -400,11 +403,12 @@ void play() {
     
     while (true) {
         while (!kbhit()) {
-            if (gameover == 1) {
-                leaderboard.insertPlayer(playerName, currentScore);
-                playerHash.insertPlayer(playerName, currentScore);
-                return;
-            }
+				if (gameover == 1) {
+		leaderboard.insertPlayer(playerName, currentScore);
+		playerHash.insertPlayer(playerName, currentScore);
+		saveScoreToFile(playerName, currentScore);
+		return;
+}
             moveDino();
             drawHurdle();
         }
@@ -502,6 +506,28 @@ void showJalur() {
     cout << "\n\nPress any key to go back\n";
     getch();
 }
+// ==================== FILE HANDLING ====================
+void saveScoreToFile(string name, int score) {
+    ofstream file(SCORE_FILE, ios::app);
+    if (file.is_open()) {
+        file << name << " " << score << endl;
+        file.close();
+    }
+}
+
+void loadScoresFromFile() {
+    ifstream file(SCORE_FILE);
+    if (!file.is_open()) return;
+
+    string name;
+    int score;
+
+    while (file >> name >> score) {
+        leaderboard.insertPlayer(name, score);
+        playerHash.insertPlayer(name, score);
+    }
+    file.close();
+}
 
 // ==================== INSTRUCTIONS ====================
 void instructions() {
@@ -523,6 +549,8 @@ void instructions() {
 // ==================== MAIN ====================
 int main() {
     setcursor(0, 0);
+	
+	loadScoresFromFile();
     
     cout << "Enter your player name: ";
     cin >> playerName;
@@ -552,4 +580,5 @@ int main() {
     } while (1);
     
     return 0;
+	
 }
