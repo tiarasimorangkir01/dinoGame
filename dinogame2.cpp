@@ -544,6 +544,34 @@ void loadScoresFromFile() {
     }
     file.close();
 }
+void deleteScoreFromFile(string name) {
+    ifstream fileIn(SCORE_FILE);
+    if (!fileIn.is_open()) {
+        cout << "Tidak ada file skor!\n";
+        return;
+    }
+
+    vector<pair<string,int>> scores;
+    string player;
+    int score;
+
+    // Baca semua skor
+    while (fileIn >> player >> score) {
+        if (player != name) { 
+            scores.push_back({player, score}); // simpan skor selain yang mau dihapus
+        }
+    }
+    fileIn.close();
+
+    // Tulis ulang file tanpa skor yang dihapus
+    ofstream fileOut(SCORE_FILE, ios::trunc);
+    for (auto& p : scores) {
+        fileOut << p.first << " " << p.second << endl;
+    }
+    fileOut.close();
+
+    cout << "Skor untuk pemain " << name << " berhasil dihapus!\n";
+}
 
 // ==================== INSTRUCTIONS ====================
 void instructions() {
@@ -582,6 +610,7 @@ int main() {
         gotoxy(10, 12); cout << "4. Search Player";
         gotoxy(10, 13); cout << "5. Show Jalur";
         gotoxy(10, 14); cout << "6. Quit";
+        gotoxy(10, 15); cout << "7. Delete Score";
         gotoxy(10, 16); cout << "Select option: ";
         
         char op = getche();
@@ -592,6 +621,15 @@ int main() {
         else if (op == '4') searchPlayer();
         else if (op == '5') showJalur();
         else if (op == '6') exit(0);
+        else if (op == '7') {
+        system("cls");
+        cout << "Masukkan nama pemain yang ingin dihapus: ";
+        string delName;
+        cin >> delName;
+        deleteScoreFromFile(delName);
+        getch();
+    }
+
         
     } while (1);
     
